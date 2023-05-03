@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { PureComponent } from 'react';
 import { Backdrop, ModalWindow } from './Modal.styled';
 
@@ -6,7 +7,7 @@ export class Modal extends PureComponent {
     if (event.code !== 'Escape') {
       return;
     }
-    this.props.onImageClick(event);
+    this.props.toggleModal(event);
   };
 
   componentDidMount() {
@@ -17,13 +18,18 @@ export class Modal extends PureComponent {
     window.removeEventListener('keydown', this.handleCloseModalByEsc);
   }
   render() {
-    const { imageURL, onImageClick } = this.props;
+    const { imageURL, toggleModal } = this.props;
     return (
-      <Backdrop>
+      <Backdrop onClick={toggleModal} data-backdrop>
         <ModalWindow>
-          <img src={imageURL} alt={imageURL} onClick={onImageClick} />
+          <img src={imageURL} alt={imageURL} />
         </ModalWindow>
       </Backdrop>
     );
   }
 }
+
+Modal.propTypes = {
+  imageURL: PropTypes.string.isRequired,
+  toggleModal: PropTypes.func.isRequired,
+};

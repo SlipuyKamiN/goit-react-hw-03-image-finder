@@ -1,5 +1,8 @@
+import PropTypes from 'prop-types';
 import { Component } from 'react';
 import { BsSearch } from 'react-icons/bs';
+import { toast } from 'react-toastify';
+
 import {
   Bar,
   Form,
@@ -19,6 +22,19 @@ export class Searchbar extends Component {
 
   onSubmit = event => {
     event.preventDefault();
+    if (this.state.query.trim() === '') {
+      toast.error('Please enter search query', {
+        position: 'top-center',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'dark',
+      });
+      return;
+    }
     this.props.onSubmit(this.state.query);
   };
 
@@ -42,3 +58,7 @@ export class Searchbar extends Component {
     );
   }
 }
+
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};

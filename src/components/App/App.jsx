@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Searchbar } from 'components/Searchbar/Searchbar';
 import { AppWrapper } from './App.styled';
 import { ImageGallery } from 'components/ImageGallery/ImageGallery';
@@ -88,19 +89,25 @@ export class App extends PureComponent {
   };
 
   toggleModal = event => {
-    if (event.code === 'Escape') {
+    const { dataset, nodeName } = event.target;
+
+    if (event.code === 'Escape' || (dataset.backdrop && nodeName !== 'IMG')) {
       return this.setState({
         modalOpen: false,
         largeImageURL: '',
       });
     }
 
-    if (event.currentTarget.nodeName === 'IMG') {
-      const largeImageURL = event.currentTarget.dataset.largeUrl || '';
+    if (dataset.openModal) {
+      const largeImageURL = dataset.largeUrl || '';
       return this.setState(prevState => ({
         modalOpen: !prevState.modalOpen,
         largeImageURL,
       }));
+    }
+
+    if (nodeName === 'IMG') {
+      return;
     }
   };
 
@@ -111,13 +118,17 @@ export class App extends PureComponent {
       <AppWrapper>
         <Searchbar onSubmit={this.handleSearch} />
         <ImageGallery images={images} onImageClick={this.toggleModal} />
-        {status === 'resolved' && <LoadMoreButton onClick={this.loadMore} />}
         {status === 'pending' && <Loader />}
+        {status === 'resolved' && <LoadMoreButton onClick={this.loadMore} />}
         {modalOpen && (
-          <Modal imageURL={largeImageURL} onImageClick={this.toggleModal} />
+          <Modal imageURL={largeImageURL} toggleModal={this.toggleModal} />
         )}
         <ToastContainer />
       </AppWrapper>
     );
   }
 }
+
+LoadMoreButton.propTypes = {
+  onClick: PropTypes.func.isRequired,
+};
