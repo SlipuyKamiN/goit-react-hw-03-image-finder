@@ -3,19 +3,12 @@ import { PureComponent } from 'react';
 import { Backdrop, ModalWindow } from './Modal.styled';
 
 export class Modal extends PureComponent {
-  handleCloseModalByEsc = event => {
-    if (event.code !== 'Escape') {
-      return;
-    }
-    this.props.toggleModal(event);
-  };
-
   componentDidMount() {
-    window.addEventListener('keydown', this.handleCloseModalByEsc);
+    window.addEventListener('keydown', this.props.toggleModal);
   }
 
   componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleCloseModalByEsc);
+    window.removeEventListener('keydown', this.props.toggleModal);
   }
   render() {
     const { imageURL, toggleModal } = this.props;

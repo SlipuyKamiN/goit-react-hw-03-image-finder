@@ -3,7 +3,6 @@ import { Searchbar } from 'components/Searchbar/Searchbar';
 import { AppWrapper } from './App.styled';
 import { ImageGallery } from 'components/ImageGallery/ImageGallery';
 import { LoadMoreButton } from 'components/LoadMoreButton/LoadMoreButton';
-import { Modal } from 'components/Modal/Modal';
 import { PureComponent } from 'react';
 import { getImages } from 'API/getImages';
 import { Loader } from 'components/Loader/Loader';
@@ -15,8 +14,6 @@ export class App extends PureComponent {
     images: [],
     page: null,
     searchQuery: '',
-    largeImageURL: '',
-    modalOpen: false,
     status: 'idle',
   };
 
@@ -88,41 +85,15 @@ export class App extends PureComponent {
     }
   };
 
-  toggleModal = event => {
-    const { dataset, nodeName } = event.target;
-
-    if (event.code === 'Escape' || (dataset.backdrop && nodeName !== 'IMG')) {
-      return this.setState({
-        modalOpen: false,
-        largeImageURL: '',
-      });
-    }
-
-    if (dataset.openModal) {
-      const largeImageURL = dataset.largeUrl || '';
-      return this.setState(prevState => ({
-        modalOpen: !prevState.modalOpen,
-        largeImageURL,
-      }));
-    }
-
-    if (nodeName === 'IMG') {
-      return;
-    }
-  };
-
   render() {
-    const { images, largeImageURL, modalOpen, status } = this.state;
+    const { images, status } = this.state;
 
     return (
       <AppWrapper>
         <Searchbar onSubmit={this.handleSearch} />
-        <ImageGallery images={images} onImageClick={this.toggleModal} />
+        <ImageGallery images={images} />
         {status === 'pending' && <Loader />}
         {status === 'resolved' && <LoadMoreButton onClick={this.loadMore} />}
-        {modalOpen && (
-          <Modal imageURL={largeImageURL} toggleModal={this.toggleModal} />
-        )}
         <ToastContainer />
       </AppWrapper>
     );
