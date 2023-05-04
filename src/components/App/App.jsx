@@ -29,60 +29,60 @@ export class App extends PureComponent {
       theme: 'dark',
     });
 
-  handleSearch = async searchQuery => {
-    const page = 1;
-    this.setState({ status: 'pending' });
+  async componentDidUpdate(_, prevState) {
+    let { searchQuery, page, status } = this.state;
 
-    try {
-      const images = await getImages(searchQuery, page);
-      const status =
-        images.length === 12
-          ? 'resolved'
-          : images.length < 12 && images.length !== 0
-          ? 'idle'
-          : 'rejected';
+    if (prevState.page !== page || prevState.searchQuery !== searchQuery) {
+      try {
+        this.setState({ status: 'pending' });
+        const newImages = await getImages(searchQuery, page);
 
-      if (images.length === 0) {
-        this.notification(`There are no results for "${searchQuery}" request.`);
+        switch (newImages.length) {
+          case 0:
+            this.notification(
+              `There are no results for "${searchQuery}" request.`
+            );
+            status = 'rejected';
+            break;
+          case 12:
+            status = 'resolved';
+            break;
+          default:
+            status = 'idle';
+            break;
+        }
+
+        this.setState(prevState => {
+          const images = [...prevState.images, ...newImages];
+          return {
+            images,
+            status,
+          };
+        });
+      } catch (error) {
+        console.log(error.message);
+        this.notification();
+        this.setState({
+          status: 'rejected',
+        });
       }
-
-      this.setState({
-        images,
-        searchQuery,
-        page,
-        status,
-      });
-    } catch (error) {
-      console.log(error.message);
-      this.notification();
-      this.setState({
-        status: 'rejected',
-      });
     }
+  }
+
+  handleFormSubmit = searchQuery => {
+    if (searchQuery === this.state.searchQuery) {
+      this.notification(`You are already looking at "${searchQuery}"`);
+
+      return;
+    }
+
+    this.setState({ searchQuery, page: 1, images: [] });
   };
 
-  loadMore = async () => {
-    let { searchQuery, page } = this.state;
-    page += 1;
-    this.setState({ status: 'pending' });
-
-    try {
-      const currentImages = await getImages(searchQuery, page);
-      const isLastImages = currentImages.length < 12;
-      this.setState(prevState => {
-        const images = [...prevState.images, ...currentImages];
-        return {
-          images,
-          page,
-          status: isLastImages ? 'idle' : 'resolved',
-        };
-      });
-    } catch (error) {
-      this.notification();
-      this.setState({
-        status: 'rejected',
-      });
-    }
+  handleLoadMore = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }));
   };
 
   render() {
@@ -90,10 +90,12 @@ export class App extends PureComponent {
 
     return (
       <AppWrapper>
-        <Searchbar onSubmit={this.handleSearch} />
+        <Searchbar onSubmit={this.handleFormSubmit} />
         <ImageGallery images={images} />
         {status === 'pending' && <Loader />}
-        {status === 'resolved' && <LoadMoreButton onClick={this.loadMore} />}
+        {status === 'resolved' && (
+          <LoadMoreButton onClick={this.handleLoadMore} />
+        )}
         <ToastContainer />
       </AppWrapper>
     );
