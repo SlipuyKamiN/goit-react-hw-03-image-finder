@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { Searchbar } from 'components/Searchbar/Searchbar';
 import { AppWrapper } from './App.styled';
 import { ImageGallery } from 'components/ImageGallery/ImageGallery';
