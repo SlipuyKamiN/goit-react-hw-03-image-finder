@@ -101,7 +101,3 @@ export class App extends PureComponent {
     );
   }
 }
-
-LoadMoreButton.propTypes = {
-  onClick: PropTypes.func.isRequired,
-};
